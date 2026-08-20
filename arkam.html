@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>لعبة الأرقام - إيجاد الناتج</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#070b1f;
+    --navy2:#0e1638;
+    --navy3:#141d4a;
+    --gold:#d4af37;
+    --gold-light:#f4e4a6;
+    --gold-dim:#8a6f2a;
+    --red:#e2544a;
+    --green:#4caf7d;
+    --text:#eae6d8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    height:100%;
+    background:var(--navy);
+    color:var(--text);
+    font-family:'Cairo',sans-serif;
+    overflow-x:hidden;
+  }
+  canvas#stars{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    display:block;
+  }
+  .wrap{
+    position:relative;
+    z-index:1;
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:18px 14px 40px;
+  }
+  h1{
+    font-family:'Amiri',serif;
+    font-size:1.9rem;
+    color:var(--gold-light);
+    text-shadow:0 0 18px rgba(212,175,55,0.45);
+    text-align:center;
+    letter-spacing:1px;
+  }
+  .subtitle{
+    color:var(--gold-dim);
+    font-size:0.85rem;
+    margin-top:4px;
+    margin-bottom:16px;
+    text-align:center;
+  }
+  .divider{
+    width:120px;
+    height:2px;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin:8px 0 18px;
+  }
+
+  .status-bar{
+    display:flex;
+    gap:10px;
+    width:100%;
+    max-width:460px;
+    margin-bottom:16px;
+  }
+  .status-box{
+    flex:1;
+    background:linear-gradient(160deg, var(--navy3), var(--navy2));
+    border:1px solid rgba(212,175,55,0.35);
+    border-radius:12px;
+    padding:8px 6px;
+    text-align:center;
+  }
+  .status-box .label{font-size:0.7rem;color:var(--gold-dim);}
+  .status-box .value{font-size:1.15rem;font-weight:800;color:var(--gold-light);}
+
+  .target-card{
+    background:radial-gradient(circle at 50% 0%, rgba(212,175,55,0.18), transparent 70%), linear-gradient(160deg, var(--navy3), var(--navy2));
+    border:2px solid var(--gold);
+    border-radius:18px;
+    padding:14px 30px;
+    text-align:center;
+    box-shadow:0 0 25px rgba(212,175,55,0.25);
+    margin-bottom:18px;
+  }
+  .target-card .label{font-size:0.85rem;color:var(--gold-light);letter-spacing:2px;}
+  .target-card .num{
+    font-size:2.6rem;
+    font-weight:800;
+    color:#fff;
+    font-family:'Amiri',serif;
+    text-shadow:0 0 20px rgba(212,175,55,0.6);
+  }
+
+  .tiles{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    max-width:460px;
+    margin-bottom:16px;
+  }
+  .tile{
+    width:70px;
+    height:70px;
+    border-radius:16px;
+    background:linear-gradient(160deg, var(--navy3), var(--navy2));
+    border:2px solid var(--gold-dim);
+    color:var(--gold-light);
+    font-size:1.5rem;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:all .15s ease;
+    user-select:none;
+  }
+  .tile:active{transform:scale(0.94);}
+  .tile.selected{
+    border-color:var(--gold);
+    background:linear-gradient(160deg,#2a2410,#1a1608);
+    box-shadow:0 0 18px rgba(212,175,55,0.55);
+    transform:translateY(-4px);
+  }
+  .tile.solved{
+    border-color:var(--green);
+    color:#c9ffe0;
+    box-shadow:0 0 22px rgba(76,175,125,0.5);
+  }
+
+  .ops{
+    display:flex;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .op-btn{
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    background:linear-gradient(160deg, var(--navy3), var(--navy2));
+    border:2px solid var(--gold-dim);
+    color:var(--gold);
+    font-size:1.4rem;
+    font-weight:800;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .op-btn.active{
+    border-color:var(--gold);
+    box-shadow:0 0 16px rgba(212,175,55,0.5);
+    color:var(--gold-light);
+  }
+  .op-btn:active{transform:scale(0.9);}
+
+  .message{
+    min-height:26px;
+    font-size:1rem;
+    font-weight:700;
+    text-align:center;
+    margin-bottom:10px;
+  }
+  .message.ok{color:var(--green);}
+  .message.err{color:var(--red);}
+  .message.info{color:var(--gold-light);}
+
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    max-width:460px;
+    margin-bottom:20px;
+  }
+  .btn{
+    padding:10px 16px;
+    border-radius:10px;
+    border:1px solid var(--gold-dim);
+    background:linear-gradient(160deg, var(--navy3), var(--navy2));
+    color:var(--gold-light);
+    font-family:'Cairo',sans-serif;
+    font-weight:700;
+    font-size:0.85rem;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .btn:active{transform:scale(0.95);}
+  .btn.primary{
+    border-color:var(--gold);
+    background:linear-gradient(160deg,#2a2410,#1a1608);
+    color:var(--gold-light);
+  }
+  .btn.danger{border-color:var(--red);color:#ffb3ac;}
+
+  .log-panel{
+    width:100%;
+    max-width:460px;
+    background:rgba(14,22,56,0.6);
+    border:1px solid rgba(212,175,55,0.25);
+    border-radius:14px;
+    padding:12px 16px;
+    max-height:150px;
+    overflow-y:auto;
+  }
+  .log-panel h3{
+    font-size:0.85rem;
+    color:var(--gold-dim);
+    margin-bottom:6px;
+  }
+  .log-panel ol{
+    padding-inline-start:20px;
+    font-size:0.85rem;
+    line-height:1.7;
+    color:var(--text);
+  }
+  .log-panel .empty{color:var(--gold-dim);font-size:0.8rem;}
+
+  .rules{
+    max-width:460px;
+    margin-top:18px;
+    font-size:0.78rem;
+    color:var(--gold-dim);
+    text-align:center;
+    line-height:1.8;
+  }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div class="wrap">
+  <h1>لعبة الأرقام</h1>
+  <div class="subtitle">اجمع بين الأرقام بعمليات حسابية للوصول إلى الرقم الهدف</div>
+  <div class="divider"></div>
+
+  <div class="status-bar">
+    <div class="status-box"><div class="label">الجولة</div><div class="value" id="roundVal">1</div></div>
+    <div class="status-box"><div class="label">النقاط</div><div class="value" id="scoreVal">0</div></div>
+    <div class="status-box"><div class="label">الوقت</div><div class="value" id="timeVal">60</div></div>
+  </div>
+
+  <div class="target-card">
+    <div class="label">الرقم الهدف</div>
+    <div class="num" id="targetVal">--</div>
+  </div>
+
+  <div class="tiles" id="tilesBox"></div>
+
+  <div class="ops" id="opsBox">
+    <button class="op-btn" data-op="+">+</button>
+    <button class="op-btn" data-op="-">−</button>
+    <button class="op-btn" data-op="×">×</button>
+    <button class="op-btn" data-op="÷">÷</button>
+  </div>
+
+  <div class="message" id="msgBox"></div>
+
+  <div class="controls">
+    <button class="btn" id="undoBtn">↩ تراجع</button>
+    <button class="btn" id="resetBtn">إعادة الجولة</button>
+    <button class="btn primary" id="newRoundBtn">🎲 جولة جديدة</button>
+    <button class="btn danger" id="solveBtn">💡 إظهار الحل</button>
+  </div>
+
+  <div class="log-panel">
+    <h3>خطوات الحل</h3>
+    <ol id="logList"></ol>
+    <div class="empty" id="logEmpty">لم تُجرِ أي خطوة بعد</div>
+  </div>
+
+  <div class="rules">
+    اختر رقماً ثم عملية حسابية ثم رقماً آخر لدمجهما. كرر العملية حتى يتبقى رقم واحد يساوي الهدف.
+    القسمة يجب أن تعطي عدداً صحيحاً، والطرح لا يعطي نتيجة سالبة أو صفرية.
+  </div>
+</div>
+
+<script>
+/* ===== خلفية النجوم المتحركة ===== */
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let W, H, stars = [];
+function resize(){
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+function initStars(){
+  stars = [];
+  const count = Math.floor((W*H)/9000);
+  for(let i=0;i<count;i++){
+    stars.push({
+      x: Math.random()*W,
+      y: Math.random()*H,
+      r: Math.random()*1.4+0.3,
+      a: Math.random(),
+      speed: Math.random()*0.015+0.003
+    });
+  }
+}
+function drawStars(){
+  ctx.clearRect(0,0,W,H);
+  for(const s of stars){
+    s.a += s.speed;
+    const op = (Math.sin(s.a)+1)/2;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(244,228,166,${0.15+op*0.65})`;
+    ctx.fill();
+  }
+  requestAnimationFrame(drawStars);
+}
+window.addEventListener('resize', ()=>{resize(); initStars();});
+resize(); initStars(); drawStars();
+
+/* ===== منطق اللعبة ===== */
+let tiles = [];        // {id, value}
+let history = [];      // نسخ سابقة من tiles
+let selectedFirst = null;
+let selectedOp = null;
+let steps = [];
+let score = 0;
+let round = 1;
+let target = 0;
+let solutionSteps = [];
+let tileIdCounter = 0;
+let timeLeft = 60;
+let timerInterval = null;
+let roundOver = false;
+
+const tilesBox = document.getElementById('tilesBox');
+const opsBox = document.getElementById('opsBox');
+const msgBox = document.getElementById('msgBox');
+const targetValEl = document.getElementById('targetVal');
+const roundValEl = document.getElementById('roundVal');
+const scoreValEl = document.getElementById('scoreVal');
+const timeValEl = document.getElementById('timeVal');
+const logList = document.getElementById('logList');
+const logEmpty = document.getElementById('logEmpty');
+
+/* ----- توليد الأرقام (على طريقة Countdown) ----- */
+function draw6(){
+  const smallPool = [];
+  for(let n=1;n<=10;n++){ smallPool.push(n); smallPool.push(n); }
+  const bigPool = [25,50,75,100];
+
+  const bigCount = Math.floor(Math.random()*4); // 0..3 كبيرة عادة
+  const chosenBig = [];
+  const bigCopy = [...bigPool];
+  for(let i=0;i<bigCount;i++){
+    const idx = Math.floor(Math.random()*bigCopy.length);
+    chosenBig.push(bigCopy.splice(idx,1)[0]);
+  }
+  const needed = 6 - chosenBig.length;
+  const chosenSmall = [];
+  const smallCopy = [...smallPool];
+  for(let i=0;i<needed;i++){
+    const idx = Math.floor(Math.random()*smallCopy.length);
+    chosenSmall.push(smallCopy.splice(idx,1)[0]);
+  }
+  return [...chosenBig, ...chosenSmall];
+}
+
+/* ----- محرك الحل (يبحث عن كل النتائج الممكنة) ----- */
+function combineAll(a,b){
+  const res = [];
+  res.push({value:a+b, text:`${a} + ${b} = ${a+b}`});
+  res.push({value:a*b, text:`${a} × ${b} = ${a*b}`});
+  if(a!==b){
+    const big = Math.max(a,b), small = Math.min(a,b);
+    res.push({value:big-small, text:`${big} - ${small} = ${big-small}`});
+  }
+  const big = Math.max(a,b), small = Math.min(a,b);
+  if(small!==0 && big%small===0){
+    res.push({value:big/small, text:`${big} ÷ ${small} = ${big/small}`});
+  }
+  return res;
+}
+
+function solve(startNums){
+  const resultsMap = new Map();
+  const visited = new Set();
+
+  function recurse(nums, stepsSoFar){
+    const key = nums.slice().sort((a,b)=>a-b).join(',');
+    if(visited.has(key)) return;
+    visited.add(key);
+
+    if(nums.length===1){
+      if(!resultsMap.has(nums[0])) resultsMap.set(nums[0], stepsSoFar.slice());
+      return;
+    }
+    for(let i=0;i<nums.length;i++){
+      for(let j=i+1;j<nums.length;j++){
+        const a = nums[i], b = nums[j];
+        const rest = nums.filter((_,idx)=>idx!==i && idx!==j);
+        const combos = combineAll(a,b);
+        for(const c of combos){
+          recurse([...rest, c.value], [...stepsSoFar, c.text]);
+        }
+      }
+    }
+  }
+  recurse(startNums, []);
+  return resultsMap;
+}
+
+/* ----- توليد جولة جديدة ----- */
+function generateRound(){
+  let nums, map, keys;
+  let attempts = 0;
+  do{
+    nums = draw6();
+    map = solve(nums);
+    keys = Array.from(map.keys()).filter(v=>v>0);
+    attempts++;
+  } while(keys.length===0 && attempts<15);
+
+  const threeDigit = keys.filter(v=>v>=100 && v<=999);
+  const pool = threeDigit.length ? threeDigit : keys;
+  target = pool[Math.floor(Math.random()*pool.length)];
+  solutionSteps = map.get(target) || [];
+
+  tiles = nums.map(v=>({id: tileIdCounter++, value:v}));
+  history = [];
+  steps = [];
+  selectedFirst = null;
+  selectedOp = null;
+  roundOver = false;
+
+  targetValEl.textContent = target;
+  renderTiles();
+  renderLog();
+  setMessage('','');
+  startTimer();
+}
+
+/* ----- المؤقت ----- */
+function startTimer(){
+  clearInterval(timerInterval);
+  timeLeft = 60;
+  timeValEl.textContent = timeLeft;
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    timeValEl.textContent = timeLeft;
+    if(timeLeft<=0){
+      clearInterval(timerInterval);
+      if(!roundOver){
+        roundOver = true;
+        setMessage('⏱ انتهى الوقت! إليك الحل:', 'err');
+        revealSolution();
+      }
+    }
+  },1000);
+}
+
+/* ----- عرض القطع ----- */
+function renderTiles(){
+  tilesBox.innerHTML = '';
+  tiles.forEach(t=>{
+    const btn = document.createElement('div');
+    btn.className = 'tile' + (t.id===selectedFirst ? ' selected':'') + (tiles.length===1 && t.value===target ? ' solved':'');
+    btn.textContent = t.value;
+    btn.addEventListener('click', ()=> onTileClick(t.id));
+    tilesBox.appendChild(btn);
+  });
+}
+
+function renderLog(){
+  logList.innerHTML = '';
+  if(steps.length===0){
+    logEmpty.style.display = 'block';
+  }else{
+    logEmpty.style.display = 'none';
+    steps.forEach(s=>{
+      const li = document.createElement('li');
+      li.textContent = s;
+      logList.appendChild(li);
+    });
+  }
+}
+
+function setMessage(txt, type){
+  msgBox.textContent = txt;
+  msgBox.className = 'message' + (type ? ' '+type : '');
+}
+
+/* ----- التفاعل مع القطع والعمليات ----- */
+function onTileClick(id){
+  if(roundOver || tiles.length===1) return;
+
+  if(selectedFirst===null){
+    selectedFirst = id;
+    renderTiles();
+    return;
+  }
+  if(id===selectedFirst){
+    selectedFirst = null;
+    selectedOp = null;
+    renderTiles();
+    updateOpsUI();
+    return;
+  }
+  if(selectedOp===null){
+    setMessage('اختر عملية حسابية أولاً', 'info');
+    return;
+  }
+  attemptCombine(selectedFirst, id, selectedOp);
+}
+
+opsBox.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.op-btn');
+  if(!btn || roundOver) return;
+  if(selectedFirst===null){
+    setMessage('اختر رقماً أولاً', 'info');
+    return;
+  }
+  selectedOp = btn.dataset.op;
+  updateOpsUI();
+});
+
+function updateOpsUI(){
+  document.querySelectorAll('.op-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.op===selectedOp);
+  });
+}
+
+function attemptCombine(aId, bId, op){
+  const aTile = tiles.find(t=>t.id===aId);
+  const bTile = tiles.find(t=>t.id===bId);
+  const a = aTile.value, b = bTile.value;
+  let result, text;
+
+  if(op==='+'){ result = a+b; text = `${a} + ${b} = ${result}`; }
+  else if(op==='×'){ result = a*b; text = `${a} × ${b} = ${result}`; }
+  else if(op==='-'){
+    if(a===b){ setMessage('✗ لا يمكن طرح رقمين متساويين (النتيجة صفر)', 'err'); resetSelection(); return; }
+    const big = Math.max(a,b), small = Math.min(a,b);
+    result = big-small; text = `${big} - ${small} = ${result}`;
+  }
+  else if(op==='÷'){
+    const big = Math.max(a,b), small = Math.min(a,b);
+    if(small===0 || big%small!==0){ setMessage('✗ القسمة لا تعطي عدداً صحيحاً', 'err'); resetSelection(); return; }
+    result = big/small; text = `${big} ÷ ${small} = ${result}`;
+  }
+
+  history.push(tiles.map(t=>({...t})));
+  tiles = tiles.filter(t=>t.id!==aId && t.id!==bId);
+  tiles.push({id: tileIdCounter++, value: result});
+  steps.push(text);
+  resetSelection();
+  renderTiles();
+  renderLog();
+
+  if(tiles.length===1){
+    if(tiles[0].value===target){
+      winRound();
+    }else{
+      setMessage(`الناتج الحالي: ${tiles[0].value} — ليس الهدف. جرّب "تراجع"`, 'err');
+    }
+  }else{
+    setMessage('', '');
+  }
+}
+
+function resetSelection(){
+  selectedFirst = null;
+  selectedOp = null;
+  updateOpsUI();
+}
+
+function winRound(){
+  roundOver = true;
+  clearInterval(timerInterval);
+  const stepPenalty = Math.max(0, (steps.length-1)*12);
+  const timeBonus = Math.round(timeLeft*0.8);
+  const points = Math.max(15, 100 - stepPenalty) + timeBonus;
+  score += points;
+  scoreValEl.textContent = score;
+  setMessage(`🎉 أحسنت! وصلت للهدف (+${points} نقطة)`, 'ok');
+  renderTiles();
+}
+
+/* ----- الأزرار ----- */
+document.getElementById('undoBtn').addEventListener('click', ()=>{
+  if(roundOver || history.length===0) return;
+  tiles = history.pop();
+  steps.pop();
+  resetSelection();
+  renderTiles();
+  renderLog();
+  setMessage('', '');
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  const orig = history.length>0 ? history[0] : tiles;
+  tiles = orig.map(t=>({...t}));
+  history = [];
+  steps = [];
+  resetSelection();
+  roundOver = false;
+  renderTiles();
+  renderLog();
+  setMessage('تمت إعادة الجولة', 'info');
+  startTimer();
+});
+
+document.getElementById('newRoundBtn').addEventListener('click', ()=>{
+  round++;
+  roundValEl.textContent = round;
+  generateRound();
+});
+
+document.getElementById('solveBtn').addEventListener('click', ()=>{
+  if(roundOver) return;
+  roundOver = true;
+  clearInterval(timerInterval);
+  setMessage('💡 هذا أحد الحلول الممكنة:', 'info');
+  revealSolution();
+});
+
+function revealSolution(){
+  steps = [...solutionSteps];
+  renderLog();
+  renderTiles();
+}
+
+/* ----- بدء اللعبة ----- */
+generateRound();
+</script>
+</body>
+</html>

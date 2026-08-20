@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>آلة الكسور المطورة</title>
+<style>
+body{
+    font-family: Arial;
+    text-align: center;
+    margin-top: 30px;
+    background:#f2f2f2;
+}
+
+.box{
+    background:white;
+    display:inline-block;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input{
+    width:80px;
+    padding:5px;
+    margin:4px;
+}
+
+button{
+    padding:8px 12px;
+    margin:5px;
+    cursor:pointer;
+}
+
+.fraction{
+    display:inline-block;
+    text-align:center;
+    font-size:28px;
+    margin-top:15px;
+}
+
+.top{
+    display:block;
+    border-bottom:2px solid black;
+    padding:0 10px;
+}
+
+.bottom{
+    display:block;
+}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>آلة الكسور المطورة</h2>
+
+<h3>الكسر الأول</h3>
+<input id="n1" type="number" placeholder="بسط">
+<input id="d1" type="number" placeholder="مقام">
+
+<h3>الكسر الثاني</h3>
+<input id="n2" type="number" placeholder="بسط">
+<input id="d2" type="number" placeholder="مقام">
+
+<br>
+
+<button onclick="calc('+')">جمع +</button>
+<button onclick="calc('-')">طرح −</button>
+<button onclick="calc('*')">ضرب ×</button>
+<button onclick="calc('/')">قسمة ÷</button>
+
+<div id="result"></div>
+</div>
+
+<script>
+function pgcd(a,b){
+    a=Math.abs(a); b=Math.abs(b);
+    while(b){
+        let r=a%b;
+        a=b;
+        b=r;
+    }
+    return a;
+}
+
+function simplify(n,d){
+    let g=pgcd(n,d);
+    return [n/g,d/g];
+}
+
+function calc(op){
+    let n1=Number(document.getElementById("n1").value);
+    let d1=Number(document.getElementById("d1").value);
+    let n2=Number(document.getElementById("n2").value);
+    let d2=Number(document.getElementById("d2").value);
+
+    if(d1===0 || d2===0){
+        document.getElementById("result").innerHTML="❌ المقام لا يمكن أن يكون 0";
+        return;
+    }
+
+    let n,d;
+
+    if(op==='+'){
+        n = n1*d2 + n2*d1;
+        d = d1*d2;
+    }
+    else if(op==='-'){
+        n = n1*d2 - n2*d1;
+        d = d1*d2;
+    }
+    else if(op==='*'){
+        n = n1*n2;
+        d = d1*d2;
+    }
+    else if(op==='/'){
+        if(n2===0){
+            document.getElementById("result").innerHTML="❌ لا يمكن القسمة على صفر";
+            return;
+        }
+        n = n1*d2;
+        d = d1*n2;
+    }
+
+    let [sn,sd]=simplify(n,d);
+
+    let decimal = (sn/sd);
+
+    document.getElementById("result").innerHTML=
+    `
+    <h3>النتيجة:</h3>
+    <div class="fraction">
+        <span class="top">${sn}</span>
+        <span class="bottom">${sd}</span>
+    </div>
+    <p>≈ ${decimal.toFixed(4)}</p>
+    `;
+}
+</script>
+
+</body>
+</html>

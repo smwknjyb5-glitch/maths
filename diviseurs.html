@@ -1,0 +1,59 @@
+  <!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>قواسم عدد طبيعي</title>
+<style>
+body{
+    font-family: Arial, sans-serif;
+    direction: rtl;
+    text-align: center;
+    margin-top: 40px;
+}
+input, button{
+    font-size: 18px;
+    padding: 8px;
+}
+#result{
+    margin-top: 20px;
+    font-size: 20px;
+}
+</style>
+</head>
+<body>
+
+<h2>إيجاد قواسم عدد طبيعي</h2>
+
+<input type="number" id="n" min="1" placeholder="أدخل العدد">
+<button onclick="calculer()">احسب</button>
+
+<div id="result"></div>
+
+<script>
+function calculer() {
+    let n = parseInt(document.getElementById("n").value);
+
+    if (isNaN(n) || n < 1) {
+        document.getElementById("result").innerHTML =
+            "أدخل عدداً طبيعياً موجباً.";
+        return;
+    }
+
+    let divisors = [];
+
+    for (let i = 1; i <= n; i++) {
+        if (n % i === 0) {
+            divisors.push(i);
+        }
+    }
+
+    document.getElementById("result").innerHTML =
+        "<b>القواسم:</b><br>" +
+        divisors.join(" ، ") +
+        "<br><br><b>عدد القواسم:</b> " +
+        divisors.length;
+}
+</script>
+
+</body>
+</html>
