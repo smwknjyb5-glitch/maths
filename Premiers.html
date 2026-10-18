@@ -1,0 +1,658 @@
+ <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الأعداد الأولية — غربال إراتوستينس</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1826;
+    --bg2:#142236;
+    --panel:#182A42;
+    --panel-edge:#24395A;
+    --gold:#D4AF6A;
+    --gold-bright:#F0CE8E;
+    --sifted:#3A4658;
+    --sifted-text:#6B7788;
+    --ember:#C1554A;
+    --text:#E8E2D3;
+    --text-dim:#9AA6B8;
+    --sand:#EDE6D6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -5%, rgba(212,175,106,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 600px at 100% 20%, rgba(212,175,106,0.06), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Tajawal', sans-serif;
+    line-height:1.7;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.disp{font-family:'Amiri', serif;}
+  .num{font-family:'JetBrains Mono', monospace;}
+
+  ::selection{background:var(--gold); color:var(--bg);}
+  a{color:var(--gold);}
+
+  /* ===== layout shells ===== */
+  .wrap{max-width:1080px; margin:0 auto; padding:0 24px;}
+  section{padding:70px 0;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:10px;
+    font-size:13px; letter-spacing:.5px; color:var(--gold);
+    font-weight:700; margin-bottom:14px;
+  }
+  .eyebrow::before{content:""; width:26px; height:1px; background:var(--gold);}
+
+  /* ===== HERO ===== */
+  .hero{
+    min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+    position:relative; padding-top:40px; padding-bottom:40px;
+    border-bottom:1px solid var(--panel-edge);
+  }
+  .hero-grain{
+    position:absolute; inset:0; pointer-events:none; opacity:.35;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, var(--text-dim) 50%, transparent 50%),
+      radial-gradient(1px 1px at 30% 65%, var(--text-dim) 50%, transparent 50%),
+      radial-gradient(1px 1px at 55% 15%, var(--text-dim) 50%, transparent 50%),
+      radial-gradient(1px 1px at 75% 80%, var(--text-dim) 50%, transparent 50%),
+      radial-gradient(1px 1px at 90% 40%, var(--text-dim) 50%, transparent 50%),
+      radial-gradient(1px 1px at 20% 90%, var(--text-dim) 50%, transparent 50%);
+    background-size:100% 100%;
+  }
+  .hero h1{
+    font-size:clamp(38px,6vw,66px);
+    color:var(--sand);
+    font-weight:700;
+    margin-bottom:18px;
+    position:relative; z-index:1;
+  }
+  .hero h1 span{color:var(--gold);}
+  .hero p.lead{
+    max-width:640px; font-size:18px; color:var(--text-dim);
+    margin-bottom:34px; position:relative; z-index:1;
+  }
+  .hero-teaser{
+    display:flex; align-items:center; gap:22px; flex-wrap:wrap;
+    position:relative; z-index:1;
+  }
+  .teaser-grid{
+    display:grid; grid-template-columns:repeat(10,1fr); gap:5px;
+    width:min(360px,90vw);
+  }
+  .teaser-cell{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    background:var(--panel); border:1px solid var(--panel-edge); border-radius:5px;
+    font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono',monospace;
+    transition:all .4s ease;
+  }
+  .teaser-cell.gold{background:rgba(212,175,106,0.18); border-color:var(--gold); color:var(--gold-bright); font-weight:700;}
+  .teaser-note{font-size:14px; color:var(--text-dim); max-width:220px;}
+  .teaser-note b{color:var(--gold);}
+  .scroll-cue{
+    position:absolute; bottom:18px; right:50%; transform:translateX(50%);
+    font-size:12px; color:var(--text-dim); display:flex; flex-direction:column; align-items:center; gap:6px;
+    animation:bob 2.2s ease-in-out infinite;
+  }
+  .scroll-cue .line{width:1px; height:26px; background:linear-gradient(var(--gold),transparent);}
+  @keyframes bob{0%,100%{transform:translate(50%,0);}50%{transform:translate(50%,8px);}}
+
+  /* ===== DEFINITION CARDS ===== */
+  .def-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:36px;}
+  @media(max-width:720px){.def-grid{grid-template-columns:1fr;}}
+  .def-card{
+    background:var(--panel); border:1px solid var(--panel-edge); border-radius:14px;
+    padding:26px; position:relative; overflow:hidden;
+  }
+  .def-card.prime{border-color:rgba(212,175,106,0.5);}
+  .def-card h3{font-size:22px; margin-bottom:10px; color:var(--sand);}
+  .def-card.prime h3{color:var(--gold-bright);}
+  .def-card p{color:var(--text-dim); font-size:15px; margin-bottom:14px;}
+  .factor-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .factor-chip{
+    background:var(--bg2); border:1px solid var(--panel-edge); border-radius:7px;
+    padding:5px 12px; font-family:'JetBrains Mono',monospace; font-size:14px;
+  }
+  .def-card.prime .factor-chip{border-color:var(--gold); color:var(--gold-bright);}
+
+  /* ===== SIEVE SECTION ===== */
+  .sieve-head{display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; margin-bottom:28px;}
+  .sieve-head h2{font-size:32px; color:var(--sand);}
+  .sieve-controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  button.ctrl{
+    background:var(--panel); border:1px solid var(--panel-edge); color:var(--text);
+    padding:10px 18px; border-radius:9px; font-family:'Tajawal'; font-weight:700; font-size:14px;
+    cursor:pointer; transition:.25s;
+  }
+  button.ctrl:hover{border-color:var(--gold); color:var(--gold-bright);}
+  button.ctrl.primary{background:var(--gold); color:var(--bg); border-color:var(--gold);}
+  button.ctrl.primary:hover{background:var(--gold-bright);}
+  button.ctrl:disabled{opacity:.4; cursor:not-allowed;}
+
+  .range-field{
+    display:flex; align-items:center; gap:9px;
+    background:var(--panel); border:1px solid var(--panel-edge); border-radius:9px;
+    padding:6px 8px 6px 14px;
+  }
+  .range-field label{font-size:13px; color:var(--text-dim); white-space:nowrap;}
+  .range-field input{
+    width:80px; background:var(--bg2); border:1px solid var(--panel-edge); border-radius:6px;
+    padding:8px 10px; font-family:'JetBrains Mono',monospace; font-size:15px; color:var(--sand);
+  }
+  .range-field input:focus{outline:none; border-color:var(--gold);}
+
+  .sieve-status{
+    display:flex; gap:26px; margin-bottom:22px; flex-wrap:wrap;
+    font-size:14px; color:var(--text-dim);
+  }
+  .sieve-status b{color:var(--gold-bright); font-family:'JetBrains Mono',monospace; font-size:17px;}
+
+  .sieve-grid{
+    display:grid; grid-template-columns:repeat(12,1fr); gap:6px;
+  }
+  @media(max-width:640px){.sieve-grid{grid-template-columns:repeat(8,1fr);}}
+  .cell{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    background:var(--panel); border:1px solid var(--panel-edge); border-radius:7px;
+    font-family:'JetBrains Mono',monospace; font-weight:500; font-size:14px;
+    cursor:pointer; user-select:none; position:relative;
+    transition:background .35s ease, color .35s ease, border-color .35s ease, transform .2s ease;
+  }
+  .cell:hover{transform:translateY(-2px); border-color:var(--gold);}
+  .cell.compact{font-size:11px;}
+  .cell.unit{color:var(--text-dim); cursor:default; opacity:.5;}
+  .cell.unit:hover{transform:none; border-color:var(--panel-edge);}
+  .cell.seed{
+    background:var(--gold); color:var(--bg); border-color:var(--gold); font-weight:700;
+    box-shadow:0 0 0 3px rgba(212,175,106,0.18);
+  }
+  .cell.prime{
+    background:rgba(212,175,106,0.16); border-color:var(--gold); color:var(--gold-bright); font-weight:700;
+  }
+  .cell.sifted{
+    background:var(--bg2); border-color:var(--panel-edge); color:var(--sifted-text); cursor:default;
+  }
+  .cell.sifted::after{
+    content:""; position:absolute; inset:0; margin:auto; width:70%; height:1px;
+    background:var(--sifted-text); transform:rotate(-28deg);
+  }
+  .cell.justsifted{animation:puff .5s ease;}
+  @keyframes puff{0%{transform:scale(1);}40%{transform:scale(1.18); background:rgba(193,85,74,0.35);}100%{transform:scale(1);}}
+
+  .sieve-hint{margin-top:18px; font-size:14px; color:var(--text-dim);}
+  .sieve-hint b{color:var(--gold);}
+
+  /* ===== CHECKER (مسبار) ===== */
+  .checker{
+    background:var(--panel); border:1px solid var(--panel-edge); border-radius:16px;
+    padding:34px; margin-top:20px;
+  }
+  .checker h2{font-size:28px; color:var(--sand); margin-bottom:8px;}
+  .checker>p{color:var(--text-dim); margin-bottom:24px; max-width:560px;}
+  .checker-input-row{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:26px;}
+  input#probe{
+    background:var(--bg2); border:1px solid var(--panel-edge); border-radius:9px;
+    padding:12px 16px; font-family:'JetBrains Mono',monospace; font-size:18px; color:var(--sand);
+    width:160px;
+  }
+  input#probe:focus{outline:none; border-color:var(--gold);}
+  .checker-result{
+    min-height:120px; display:flex; flex-direction:column; gap:16px;
+  }
+  .verdict{
+    display:inline-flex; align-items:center; gap:10px; font-size:20px; font-weight:700;
+    padding:10px 18px; border-radius:10px; width:fit-content;
+  }
+  .verdict.is-prime{background:rgba(212,175,106,0.16); color:var(--gold-bright); border:1px solid var(--gold);}
+  .verdict.not-prime{background:rgba(193,85,74,0.15); color:#E39187; border:1px solid var(--ember);}
+  .verdict.neutral{background:var(--bg2); color:var(--text-dim); border:1px solid var(--panel-edge);}
+  .division-trace{display:flex; flex-direction:column; gap:5px; font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--text-dim);}
+  .division-trace .hit{color:var(--ember); font-weight:700;}
+  .division-trace .ok{color:var(--gold-bright);}
+
+  /* ===== QUIZ ===== */
+  .quiz{background:var(--panel); border:1px solid var(--panel-edge); border-radius:16px; padding:34px; margin-top:20px;}
+  .quiz h2{font-size:28px; color:var(--sand); margin-bottom:8px;}
+  .quiz>p{color:var(--text-dim); margin-bottom:24px;}
+  .quiz-stage{display:flex; flex-direction:column; align-items:center; gap:22px; padding:20px 0;}
+  .quiz-number{
+    font-family:'JetBrains Mono',monospace; font-size:64px; font-weight:700; color:var(--sand);
+    background:var(--bg2); border:1px solid var(--panel-edge); border-radius:16px;
+    width:160px; height:130px; display:flex; align-items:center; justify-content:center;
+  }
+  .quiz-choices{display:flex; gap:14px;}
+  .qbtn{
+    padding:14px 30px; border-radius:10px; font-family:'Tajawal'; font-weight:700; font-size:16px;
+    cursor:pointer; border:1px solid var(--panel-edge); background:var(--bg2); color:var(--text);
+    transition:.2s;
+  }
+  .qbtn:hover{border-color:var(--gold);}
+  .qbtn.correct{background:rgba(212,175,106,0.2); border-color:var(--gold); color:var(--gold-bright);}
+  .qbtn.wrong{background:rgba(193,85,74,0.2); border-color:var(--ember); color:#E39187;}
+  .quiz-feedback{font-size:15px; color:var(--text-dim); min-height:20px; text-align:center; max-width:480px;}
+  .quiz-score{display:flex; gap:24px; font-size:14px; color:var(--text-dim);}
+  .quiz-score b{color:var(--gold-bright); font-family:'JetBrains Mono',monospace;}
+
+  /* ===== FACT STRIP ===== */
+  .facts{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:20px;}
+  @media(max-width:760px){.facts{grid-template-columns:1fr;}}
+  .fact{
+    background:var(--panel); border:1px solid var(--panel-edge); border-radius:14px; padding:22px;
+  }
+  .fact .tag{font-size:12px; color:var(--gold); font-weight:700; letter-spacing:.4px; margin-bottom:8px; display:block;}
+  .fact p{font-size:14px; color:var(--text-dim);}
+  .fact b{color:var(--sand);}
+
+  footer{
+    text-align:center; padding:40px 0 60px; color:var(--text-dim); font-size:13px;
+    border-top:1px solid var(--panel-edge); margin-top:40px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ======= HERO ======= -->
+<div class="hero">
+  <div class="hero-grain"></div>
+  <div class="wrap">
+    <div class="eyebrow">مفهوم رياضي أساسي</div>
+    <h1>الأعداد <span>الأولية</span></h1>
+    <p class="lead">
+      حبّات من الرمل لا تنقسم إلا على نفسها وعلى الواحد. غربال إراتوستينس القديم يفصلها عن باقي الأعداد،
+      حبة حبة، حتى لا يبقى في الغربال إلا الذهب الخالص.
+    </p>
+    <div class="hero-teaser">
+      <div class="teaser-grid" id="teaserGrid"></div>
+      <div class="teaser-note">اضغط على الشبكة أدناه لتبدأ الغربلة من العدد <b>2</b>، وشاهد الأعداد الأولية تتوهّج ذهبيًا بينما تُستبعد مضاعفاتها.</div>
+    </div>
+  </div>
+  <div class="scroll-cue"><span>مرّر للأسفل</span><span class="line"></span></div>
+</div>
+
+<!-- ======= DEFINITION ======= -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">التعريف</div>
+    <h2 style="font-size:32px; color:var(--sand);">ما الفرق بين العدد الأولي والعدد المركّب؟</h2>
+    <div class="def-grid">
+      <div class="def-card prime">
+        <h3>عدد أولي — Nombre premier</h3>
+        <p>عدد صحيح أكبر من 1 لا يقبل القسمة إلا على نفسه وعلى الواحد. أي أن له قاسمين فقط، لا غير.</p>
+        <div class="factor-row">
+          <span class="factor-chip">7 = 7 × 1</span>
+          <span class="factor-chip">13 = 13 × 1</span>
+          <span class="factor-chip">2 = 2 × 1</span>
+        </div>
+      </div>
+      <div class="def-card">
+        <h3>عدد مركّب — Nombre composé</h3>
+        <p>عدد صحيح أكبر من 1 له أكثر من قاسمَين، أي يمكن تفكيكه إلى جداء عوامل أصغر منه.</p>
+        <div class="factor-row">
+          <span class="factor-chip">12 = 2 × 2 × 3</span>
+          <span class="factor-chip">15 = 3 × 5</span>
+          <span class="factor-chip">9 = 3 × 3</span>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:18px; color:var(--text-dim); font-size:14px;">
+      ملاحظة: العدد <b class="num" style="color:var(--gold)">1</b> لا يُعدّ أوليًا ولا مركّبًا؛ فله قاسم واحد فقط وهو نفسه.
+    </p>
+  </div>
+</section>
+
+<!-- ======= SIEVE ======= -->
+<section id="sieveSection" style="border-top:1px solid var(--panel-edge);">
+  <div class="wrap">
+    <div class="sieve-head">
+      <div>
+        <div class="eyebrow">التجربة التفاعلية</div>
+        <h2>غربال إراتوستينس</h2>
+      </div>
+      <div class="sieve-controls">
+        <div class="range-field">
+          <label for="rangeMin">من</label>
+          <input type="number" id="rangeMin" value="2" min="2" max="999" step="1">
+        </div>
+        <div class="range-field">
+          <label for="rangeMax">إلى</label>
+          <input type="number" id="rangeMax" value="144" min="3" max="1000" step="1">
+        </div>
+        <button class="ctrl" id="applyRange">تطبيق المجال</button>
+        <button class="ctrl" id="resetSieve">إعادة الغربال</button>
+        <button class="ctrl primary" id="autoSieve">غربلة تلقائية</button>
+      </div>
+    </div>
+    <div class="sieve-status">
+      <div>المجال الحالي: <b id="rangeLabel">2 – 144</b></div>
+      <div>أعداد أولية مكتشَفة: <b id="foundCount">0</b></div>
+      <div>أعداد مستبعَدة: <b id="siftedCount">0</b></div>
+      <div>العدد التالي الذي ابدأ به الغربلة: <b id="nextSeed">2</b></div>
+    </div>
+    <div class="sieve-grid" id="sieveGrid"></div>
+    <p class="sieve-hint" id="sieveHint">اضغط على أي خانة <b>ذهبية اللون لم تُغربَل بعد</b> لتصبح "بذرة" غربلة جديدة: ستُستبعد جميع مضاعفاتها تلقائيًا، ويبقى هو أوليًا صامدًا.</p>
+  </div>
+</section>
+
+<!-- ======= CHECKER ======= -->
+<section id="checkerSection" style="border-top:1px solid var(--panel-edge);">
+  <div class="wrap">
+    <div class="checker">
+      <div class="eyebrow">المسبار</div>
+      <h2>تحقّق من عدد بنفسك</h2>
+      <p>أدخل أي عدد صحيح، وسيختبره المسبار بالقسمة على كل الأعداد الممكنة حتى جذره التربيعي.</p>
+      <div class="checker-input-row">
+        <input type="number" id="probe" placeholder="مثال: 97" min="1" max="999999">
+        <button class="ctrl primary" id="probeBtn">افحص العدد</button>
+      </div>
+      <div class="checker-result" id="probeResult">
+        <div class="verdict neutral">أدخل عددًا لبدء الفحص</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= QUIZ ======= -->
+<section id="quizSection" style="border-top:1px solid var(--panel-edge);">
+  <div class="wrap">
+    <div class="quiz">
+      <div class="eyebrow">اختبر نفسك</div>
+      <h2>أولي أم مركّب؟</h2>
+      <p>صنّف كل عدد قبل نفاد الوقت الذهني — لا يوجد مؤقّت حقيقي، فقط ثقتك بنفسك.</p>
+      <div class="quiz-stage">
+        <div class="quiz-number" id="quizNumber">--</div>
+        <div class="quiz-choices">
+          <button class="qbtn" id="choicePrime">عدد أولي</button>
+          <button class="qbtn" id="choiceComposite">عدد مركّب</button>
+        </div>
+        <div class="quiz-feedback" id="quizFeedback"></div>
+        <div class="quiz-score">
+          <div>صحيح: <b id="scoreRight">0</b></div>
+          <div>خطأ: <b id="scoreWrong">0</b></div>
+          <div>السلسلة: <b id="scoreStreak">0</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= FACTS ======= -->
+<section style="border-top:1px solid var(--panel-edge);">
+  <div class="wrap">
+    <div class="eyebrow">هل تعلم؟</div>
+    <h2 style="font-size:28px; color:var(--sand); margin-bottom:6px;">حقائق عن الأعداد الأولية</h2>
+    <div class="facts">
+      <div class="fact">
+        <span class="tag">العدد الأولي الوحيد الزوجي</span>
+        <p>العدد <b>2</b> هو العدد الأولي الوحيد الزوجي؛ فكل عدد زوجي آخر يقبل القسمة على 2، مما يجعله مركّبًا حتمًا.</p>
+      </div>
+      <div class="fact">
+        <span class="tag">لا نهاية لها</span>
+        <p>أثبت الرياضي الإغريقي إقليدس منذ أكثر من 2000 عام أن عدد الأعداد الأولية <b>لا نهائي</b>، ولا يوجد "أكبر عدد أولي" على الإطلاق.</p>
+      </div>
+      <div class="fact">
+        <span class="tag">الأعداد الأولية التوأم</span>
+        <p>زوجان من الأعداد الأولية يفصل بينهما 2 فقط، مثل <b>(11, 13)</b> أو <b>(17, 19)</b>، يُسمّيان بالأعداد الأولية التوأم.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>محاكاة تفاعلية للأعداد الأولية — غربال إراتوستينس</footer>
+
+<script>
+(function(){
+  const RANGE_MIN = 2, RANGE_MAX = 1000; // حدود مقبولة لعنصر الإدخال
+  let MIN = 2;
+  let LIMIT = 144; // الحد الأعلى الحالي للمجال، قابل للتغيير عبر applyRange
+  let state = []; // null=غير محدد، 'prime', 'sifted'
+  let cells = [];
+
+  const grid = document.getElementById('sieveGrid');
+  const rangeMinInput = document.getElementById('rangeMin');
+  const rangeMaxInput = document.getElementById('rangeMax');
+  const rangeLabel = document.getElementById('rangeLabel');
+  const sieveHint = document.getElementById('sieveHint');
+
+  function buildGrid(newMin, newMax){
+    let min = Math.max(2, newMin|0);
+    let max = Math.min(RANGE_MAX, newMax|0);
+    if(max <= min) max = min + 8; // حد أدنى معقول لعرض شبكة فعلية
+    max = Math.min(RANGE_MAX, max);
+
+    MIN = min; LIMIT = max;
+    rangeMinInput.value = MIN;
+    rangeMaxInput.value = LIMIT;
+    rangeLabel.textContent = `${MIN} – ${LIMIT}`;
+
+    // نبني حالة كاملة من 2 حتى الحد الأقصى لضمان صحة الغربلة حتى لو كانت
+    // القيمة الدنيا أكبر من 2 (فبعض عوامل الأعداد داخل المجال قد تقع تحت "من")
+    state = new Array(LIMIT+1).fill(null);
+    state[0]=state[1]='unit';
+
+    // غربلة صامتة لكل ما هو أصغر من "من"، دون عرضها، حتى تنعكس نتائجها
+    // على الأعداد المرئية داخل المجال المختار
+    for(let n=2; n<MIN; n++){
+      if(!state[n]){
+        state[n]='prime';
+        for(let m=n*2; m<=LIMIT; m+=n){ if(!state[m]) state[m]='sifted'; }
+      }
+    }
+
+    grid.innerHTML='';
+    cells = [];
+    const span = LIMIT-MIN+1;
+    grid.style.gridTemplateColumns = LIMIT > 400 ? 'repeat(16,1fr)' : (span < 12 ? `repeat(${Math.max(span,4)},1fr)` : 'repeat(12,1fr)');
+    const smallFont = String(LIMIT).length >= 4;
+
+    for(let n=MIN;n<=LIMIT;n++){
+      const c=document.createElement('div');
+      // الأعداد المُستبعَدة سلفًا (بعامل أصغر من "من") تظهر مغربَلة منذ البداية
+      c.className='cell'+(smallFont?' compact':'')+(state[n]==='sifted'?' sifted':'');
+      c.textContent=n;
+      c.dataset.n=n;
+      c.addEventListener('click',()=>trySeed(n));
+      grid.appendChild(c);
+      cells[n]=c;
+    }
+    sieveHint.innerHTML = MIN>2
+      ? `اضغط على أي خانة <b>ذهبية اللون لم تُغربَل بعد</b> لتصبح "بذرة" غربلة جديدة. ملاحظة: بعض الخانات تظهر مغربَلة من البداية لأن أحد عواملها الأولية أصغر من ${MIN}.`
+      : 'اضغط على أي خانة <b>ذهبية اللون لم تُغربَل بعد</b> لتصبح "بذرة" غربلة جديدة: ستُستبعد جميع مضاعفاتها تلقائيًا، ويبقى هو أوليًا صامدًا.';
+    document.getElementById('autoSieve').disabled=false;
+    updateStatus();
+  }
+
+  function trySeed(n){
+    if(state[n]) return; // already prime or sifted
+    state[n]='prime';
+    cells[n].classList.add('seed');
+    setTimeout(()=>{cells[n].classList.remove('seed'); cells[n].classList.add('prime');},450);
+    for(let m=n*2;m<=LIMIT;m+=n){
+      if(!state[m]){
+        state[m]='sifted';
+        if(cells[m]){
+          cells[m].classList.add('sifted','justsifted');
+          setTimeout(()=>cells[m].classList.remove('justsifted'),500);
+        }
+      }
+    }
+    updateStatus();
+  }
+
+  function updateStatus(){
+    let found=0, sifted=0;
+    for(let n=MIN;n<=LIMIT;n++){
+      if(state[n]==='prime') found++;
+      if(state[n]==='sifted') sifted++;
+    }
+    document.getElementById('foundCount').textContent=found;
+    document.getElementById('siftedCount').textContent=sifted;
+    let next='—';
+    for(let n=MIN;n<=LIMIT;n++){ if(!state[n]){next=n; break;} }
+    document.getElementById('nextSeed').textContent=next;
+    if(next==='—') document.getElementById('autoSieve').disabled=true;
+  }
+
+  document.getElementById('resetSieve').addEventListener('click',()=>{
+    buildGrid(MIN, LIMIT);
+  });
+
+  document.getElementById('applyRange').addEventListener('click',()=>{
+    const vMin=parseInt(rangeMinInput.value,10);
+    const vMax=parseInt(rangeMaxInput.value,10);
+    if(isNaN(vMin) || isNaN(vMax)) return;
+    buildGrid(vMin, vMax);
+  });
+  [rangeMinInput, rangeMaxInput].forEach(inp=>{
+    inp.addEventListener('keydown', e=>{
+      if(e.key==='Enter'){
+        const vMin=parseInt(rangeMinInput.value,10);
+        const vMax=parseInt(rangeMaxInput.value,10);
+        if(!isNaN(vMin) && !isNaN(vMax)) buildGrid(vMin, vMax);
+      }
+    });
+  });
+
+  document.getElementById('autoSieve').addEventListener('click',function(){
+    this.disabled=true;
+    let n=MIN;
+    const step=()=>{
+      while(n<=LIMIT && state[n]) n++;
+      if(n>LIMIT){ document.getElementById('autoSieve').disabled=true; return; }
+      trySeed(n);
+      n++;
+      setTimeout(step,180);
+    };
+    step();
+  });
+
+  buildGrid(MIN, LIMIT);
+
+  // ===== teaser grid (decorative, mirrors first 40 up to 10x4) =====
+  const teaserGrid=document.getElementById('teaserGrid');
+  const smallPrimes=new Set([2,3,5,7,11,13,17,19,23,29,31,37]);
+  for(let n=1;n<=40;n++){
+    const c=document.createElement('div');
+    c.className='teaser-cell'+(smallPrimes.has(n)?' gold':'');
+    c.textContent=n;
+    teaserGrid.appendChild(c);
+  }
+  document.querySelector('.hero-teaser').addEventListener('click',()=>{
+    document.getElementById('sieveSection').scrollIntoView({behavior:'smooth'});
+  });
+
+  // ===== checker (مسبار) =====
+  function primeCheck(n){
+    if(n<2) return {prime:false, trace:[`العدد ${n} أصغر من 2، فلا يُعدّ أوليًا ولا مركّبًا.`]};
+    const trace=[];
+    const limit=Math.floor(Math.sqrt(n));
+    for(let i=2; i<=limit; i++){
+      if(n%i===0){
+        trace.push(`${n} ÷ ${i} = ${n/i}  →  يقبل القسمة`);
+        return {prime:false, trace, divisor:i};
+      } else {
+        trace.push(`${n} ÷ ${i} = ${(n/i).toFixed(2)}  →  لا يقبل القسمة`);
+      }
+    }
+    return {prime:true, trace};
+  }
+
+  document.getElementById('probeBtn').addEventListener('click', runProbe);
+  document.getElementById('probe').addEventListener('keydown', e=>{ if(e.key==='Enter') runProbe(); });
+
+  function runProbe(){
+    const val=parseInt(document.getElementById('probe').value,10);
+    const resultBox=document.getElementById('probeResult');
+    if(isNaN(val) || val<1){
+      resultBox.innerHTML='<div class="verdict neutral">أدخل عددًا صحيحًا أكبر من صفر</div>';
+      return;
+    }
+    if(val===1){
+      resultBox.innerHTML='<div class="verdict neutral">العدد 1 استثناء: لا هو أولي ولا مركّب</div>';
+      return;
+    }
+    const r=primeCheck(val);
+    let html='';
+    if(r.prime){
+      html+=`<div class="verdict is-prime">✦ ${val} عدد أولي</div>`;
+    } else {
+      html+=`<div class="verdict not-prime">${val} = ${r.divisor} × ${val/r.divisor} — عدد مركّب</div>`;
+    }
+    const traceLines=r.trace.slice(0,12).map((t,i)=>{
+      const isHit = t.includes('يقبل القسمة') && !t.includes('لا يقبل');
+      return `<div class="${isHit?'hit':'ok'}">${t}</div>`;
+    }).join('');
+    html+=`<div class="division-trace">${traceLines}</div>`;
+    resultBox.innerHTML=html;
+  }
+
+  // ===== quiz =====
+  const smallPrimeSet=new Set();
+  const compositeSet=new Set();
+  (function seedSets(){
+    const sieve=new Array(200).fill(true);
+    sieve[0]=sieve[1]=false;
+    for(let i=2;i<200;i++){
+      if(sieve[i]){
+        for(let j=i*2;j<200;j+=i) sieve[j]=false;
+      }
+    }
+    for(let i=2;i<200;i++){
+      if(sieve[i]) smallPrimeSet.add(i); else compositeSet.add(i);
+    }
+  })();
+  const primeArr=[...smallPrimeSet];
+  const compArr=[...compositeSet];
+
+  let scoreRight=0, scoreWrong=0, streak=0, currentAnswer=null;
+  const quizNumberEl=document.getElementById('quizNumber');
+  const feedbackEl=document.getElementById('quizFeedback');
+  const btnPrime=document.getElementById('choicePrime');
+  const btnComposite=document.getElementById('choiceComposite');
+
+  function nextQuestion(){
+    btnPrime.className='qbtn'; btnComposite.className='qbtn';
+    feedbackEl.textContent='';
+    const useprime=Math.random()<0.5;
+    const pool = useprime? primeArr: compArr;
+    const val = pool[Math.floor(Math.random()*pool.length)];
+    currentAnswer = useprime;
+    quizNumberEl.textContent = val;
+  }
+
+  function answer(choicePrime){
+    const btn = choicePrime? btnPrime: btnComposite;
+    const other = choicePrime? btnComposite: btnPrime;
+    if(choicePrime===currentAnswer){
+      btn.classList.add('correct');
+      scoreRight++; streak++;
+      feedbackEl.textContent='إجابة صحيحة! العدد '+quizNumberEl.textContent+(currentAnswer?' أولي فعلاً.':' مركّب فعلاً.');
+    } else {
+      btn.classList.add('wrong');
+      other.classList.add('correct');
+      scoreWrong++; streak=0;
+      feedbackEl.textContent='إجابة خاطئة. العدد '+quizNumberEl.textContent+(currentAnswer?' أولي في الحقيقة.':' مركّب في الحقيقة.');
+    }
+    document.getElementById('scoreRight').textContent=scoreRight;
+    document.getElementById('scoreWrong').textContent=scoreWrong;
+    document.getElementById('scoreStreak').textContent=streak;
+    setTimeout(nextQuestion,1200);
+  }
+
+  btnPrime.addEventListener('click',()=>answer(true));
+  btnComposite.addEventListener('click',()=>answer(false));
+  nextQuestion();
+
+})();
+</script>
+</body>
+</html>
