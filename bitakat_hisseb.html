@@ -1,0 +1,326 @@
+ <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بطاقات لعبة الحساب</title>
+<style>
+:root{--navy:#0b1e3f;--gold:#d4a537;--paper:#fffdf6;--ink:#14213d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--navy);color:var(--paper);font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",sans-serif;line-height:1.7}
+header{padding:18px 16px 6px;text-align:center}
+h1{margin:0;font-size:1.6rem;color:var(--gold)}
+header p{margin:4px 0 0;opacity:.85;font-size:.95rem}
+.ctl{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:end;padding:14px 16px 18px}
+.ctl label{display:flex;flex-direction:column;font-size:.85rem;gap:2px}
+.ctl input,.ctl select{padding:7px 9px;border-radius:8px;border:1px solid var(--gold);background:#112a54;color:var(--paper);font:inherit;min-width:120px}
+button{padding:9px 18px;border-radius:8px;border:0;font:inherit;font-weight:700;cursor:pointer;background:var(--gold);color:var(--navy)}
+button.alt{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.lib{max-width:640px;margin:0 auto 18px;padding:0 16px}
+.libbar{display:flex;gap:8px}
+.libbar input{flex:1;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid var(--gold);background:#112a54;color:var(--paper);font:inherit}
+#vlist{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+#vlist li{display:flex;align-items:center;gap:8px;background:#112a54;border:1px solid var(--gold);border-radius:8px;padding:6px 10px}
+#vlist li span{flex:1;min-width:0;overflow-wrap:anywhere}
+#vlist small{opacity:.75;display:block}
+#vlist button{padding:5px 12px;font-size:.85rem}
+.imgbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:end;padding:0 16px 14px}
+.imgbar label{display:flex;flex-direction:column;font-size:.85rem;gap:2px}
+.imgbar select{padding:7px 9px;border-radius:8px;border:1px solid var(--gold);background:#112a54;color:var(--paper);font:inherit;min-width:160px}
+#msg{text-align:center;min-height:1.7em;color:var(--gold);font-size:.9rem;padding-bottom:6px}
+#out{display:flex;flex-direction:column;align-items:center;gap:18px;padding:0 8px 30px}
+.sheet{width:190mm;max-width:100%;display:grid;grid-template-columns:1fr 1fr;background:#fff;padding:0}
+.card{height:60mm;border:1px dashed #8a8a8a;background:var(--paper);color:var(--ink);padding:3.5mm 4mm;display:flex;flex-direction:column;break-inside:avoid;position:relative;overflow:hidden}
+.card .tag{font-size:9pt;font-weight:700;display:flex;justify-content:space-between;border-bottom:1.5px solid var(--navy);padding-bottom:1mm}
+.card .tag span:first-child{font-size:10.5pt}
+.nums{display:flex;flex-wrap:wrap;justify-content:center;gap:2.2mm;margin:3.5mm 0 2mm}
+.nums b{width:11mm;height:11mm;border:1.6px solid var(--navy);border-radius:50%;display:grid;place-items:center;font-size:12pt}
+.nums b.big{background:var(--navy);color:var(--gold)}
+.target{margin-top:auto;text-align:center;font-size:9pt}
+.target strong{display:block;font-size:26pt;line-height:1.1;color:var(--navy);border-top:1.5px solid var(--gold);padding-top:1mm}
+.back{background:#f6efd9}
+.steps{margin:2.5mm 0 0;padding:0;list-style:none;font-size:11pt;display:flex;flex-direction:column;gap:1mm}
+.steps li{direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
+.res{margin-top:auto;text-align:center;font-size:9pt}
+.res strong{font-size:15pt;color:var(--navy)}
+@page{size:A4;margin:10mm}
+@media print{
+ body{background:#fff}
+ header,.ctl,#msg,.lib,.imgbar{display:none}
+ #out{display:block;padding:0}
+ .sheet{width:190mm;break-after:page;page-break-after:always}
+ .sheet:last-child{break-after:auto;page-break-after:auto}
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header>
+<h1>بطاقات لعبة الحساب</h1>
+<p>البطاقة الأولى: الأعداد والهدف — البطاقة الثانية: الحل. استعمل الأعداد بعمليات + − × ÷ للوصول إلى الهدف.</p>
+</header>
+<div class="ctl">
+<label>عدد البطاقات<input id="n" type="number" min="1" max="40" value="8"></label>
+<label>الأعداد الكبيرة (25، 50، 75، 100)
+<select id="L"><option value="r">عشوائي</option><option>0</option><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+<label>الصعوبة
+<select id="d"><option value="2">سهل</option><option value="3" selected>متوسط</option><option value="4">صعب</option></select></label>
+<label>التنسيق
+<select id="m"><option value="duplex">وجه وظهر (طباعة على الوجهين)</option><option value="pair">البطاقة وحلّها متجاورتان</option></select></label>
+<button id="go">توليد البطاقات</button>
+<button id="pr" class="alt">طباعة</button>
+<button id="sh" class="alt">حفظ كملف HTML</button>
+<button id="sj" class="alt">حفظ البيانات (JSON)</button>
+<button id="lj" class="alt">فتح ملف محفوظ</button>
+<input id="file" type="file" accept=".json,application/json" hidden>
+</div>
+<div id="msg" aria-live="polite"></div>
+<section class="lib" aria-label="النسخ المحفوظة">
+<div class="libbar"><input id="vname" type="text" maxlength="60" placeholder="اسم النسخة (مثال: حصة الثلاثاء)"><button id="vsave">حفظ نسخة</button></div>
+<ul id="vlist"></ul>
+</section>
+<div class="imgbar">
+<label>الورقة<select id="sel"></select></label>
+<button id="ci">نسخ كصورة (للصق)</button>
+<button id="si" class="alt">حفظ كصورة PNG</button>
+<button id="sa" class="alt">حفظ كل الأوراق PNG</button>
+</div>
+<div id="out" aria-live="polite"></div>
+<script>
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const BIG=[25,50,75,100];
+const KEY='arithmetic-cards-v1';
+let current=[];
+
+function draw(L){
+  if(L==='r')L=Math.floor(Math.random()*5);
+  L=+L;
+  let big=[...BIG],small=[1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10],out=[];
+  while(out.length<L){out.push(big.splice(Math.floor(Math.random()*big.length),1)[0])}
+  while(out.length<6){out.push(small.splice(Math.floor(Math.random()*small.length),1)[0])}
+  return out.sort((a,b)=>a-b);
+}
+function solve(nums,min){
+  for(let t=0;t<400;t++){
+    let pool=nums.map(v=>({v,s:[]}));
+    while(pool.length>1){
+      let i=Math.floor(Math.random()*pool.length),j;
+      do{j=Math.floor(Math.random()*pool.length)}while(j===i);
+      let a=pool[i],b=pool[j];
+      if(a.v<b.v)[a,b]=[b,a];
+      const ops=['+'];
+      if(a.v>b.v)ops.push('−');
+      if(b.v>1)ops.push('×');
+      if(b.v>1&&a.v%b.v===0)ops.push('÷');
+      const op=rnd(ops);
+      const r=op==='+'?a.v+b.v:op==='−'?a.v-b.v:op==='×'?a.v*b.v:a.v/b.v;
+      const nw={v:r,s:[...a.s,...b.s,`${a.v} ${op} ${b.v} = ${r}`]};
+      pool=pool.filter((_,k)=>k!==i&&k!==j);pool.push(nw);
+      if(r>100&&r<1000&&nw.s.length>=min)return{target:r,steps:nw.s};
+    }
+  }
+  return null;
+}
+function make(){
+  const L=$('L').value,min=+$('d').value;
+  for(;;){const nums=draw(L),s=solve(nums,min);if(s)return{nums,...s}}
+}
+const front=(p,i)=>`<div class="card"><div class="tag"><span>لعبة أرقام وعمليات</span><span>البطاقة ${i+1}</span></div>
+<div class="nums">${p.nums.map(x=>`<b class="${x>10?'big':''}">${x}</b>`).join('')}</div>
+<div class="target">الهدف<strong>${p.target}</strong></div></div>`;
+const back=(p,i)=>`<div class="card back"><div class="tag"><span>حل البطاقة رقم ${i+1}</span></div>
+<ul class="steps">${p.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+<div class="res">الناتج <strong>${p.target}</strong></div></div>`;
+
+function render(){
+  const ps=current,n=ps.length;
+  const mode=$('m').value;
+  let html='';
+  if(mode==='duplex'){
+    for(let k=0;k<n;k+=8){
+      const ch=ps.slice(k,k+8).map((p,j)=>[p,k+j]);
+      html+=`<div class="sheet">${ch.map(([p,i])=>front(p,i)).join('')}</div>`;
+      const bk=[];
+      for(let j=0;j<ch.length;j+=2){ if(ch[j+1])bk.push(ch[j+1]); bk.push(ch[j]); }
+      html+=`<div class="sheet">${bk.map(([p,i])=>back(p,i)).join('')}</div>`;
+    }
+  }else{
+    for(let k=0;k<n;k+=4){
+      const ch=ps.slice(k,k+4);
+      html+=`<div class="sheet">${ch.map((p,j)=>front(p,k+j)+back(p,k+j)).join('')}</div>`;
+    }
+  }
+  $('out').innerHTML=html;
+  fillSheets();
+}
+
+/* ---------- الحفظ ---------- */
+function say(t){$('msg').textContent=t;clearTimeout(say.t);say.t=setTimeout(()=>$('msg').textContent='',4000)}
+function settings(){return{n:$('n').value,L:$('L').value,d:$('d').value,m:$('m').value}}
+function applySettings(s){
+  if(!s)return;
+  for(const k of ['n','L','d','m']){
+    if(s[k]==null)continue;
+    const el=$(k);
+    if(k==='n'||[...el.options].some(o=>(o.value||o.text)===String(s[k])))el.value=s[k];
+  }
+}
+function autosave(){
+  try{localStorage.setItem(KEY,JSON.stringify({settings:settings(),cards:current}))}catch(e){}
+}
+function autoload(){
+  try{
+    const d=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(d&&valid(d.cards)){applySettings(d.settings);current=d.cards;return true}
+  }catch(e){}
+  return false;
+}
+function valid(c){
+  return Array.isArray(c)&&c.length>0&&c.length<=200&&c.every(p=>
+    p&&Array.isArray(p.nums)&&p.nums.length===6&&p.nums.every(Number.isFinite)&&
+    Number.isFinite(p.target)&&Array.isArray(p.steps)&&p.steps.every(s=>typeof s==='string'));
+}
+function download(name,text,type){
+  const url=URL.createObjectURL(new Blob([text],{type}));
+  const a=document.createElement('a');
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+const stamp=()=>new Date().toISOString().slice(0,10);
+
+function saveHTML(){
+  if(!current.length)return;
+  const css=document.querySelector('style').textContent;
+  const doc=`<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>بطاقات لعبة الحساب</title>\n<style>${css}</style>\n</head>\n<body>\n<div id="out">${$('out').innerHTML}</div>\n</body>\n</html>`;
+  download(`cartes-${stamp()}.html`,doc,'text/html;charset=utf-8');
+  say('تم حفظ الملف. افتحه واطبعه متى شئت.');
+}
+function saveJSON(){
+  if(!current.length)return;
+  download(`cartes-${stamp()}.json`,JSON.stringify({settings:settings(),cards:current},null,1),'application/json');
+  say('تم حفظ البيانات. استعمل «فتح ملف محفوظ» لإعادة تحميلها.');
+}
+function loadJSON(file){
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!d||!valid(d.cards))throw 0;
+      applySettings(d.settings);
+      current=d.cards;
+      $('n').value=current.length;
+      render();autosave();
+      say('تم تحميل '+current.length+' بطاقة.');
+    }catch(e){say('الملف غير صالح.')}
+  };
+  r.readAsText(file);
+}
+function generate(){
+  const n=Math.max(1,Math.min(40,+$('n').value||8));
+  current=Array.from({length:n},make);
+  render();autosave();
+}
+
+/* ---------- النسخ المحفوظة ---------- */
+const VKEY='arithmetic-cards-versions-v1';
+const getVersions=()=>{
+  try{const v=JSON.parse(localStorage.getItem(VKEY)||'[]');return Array.isArray(v)?v.filter(x=>x&&valid(x.cards)):[]}catch(e){return[]}
+};
+function setVersions(v){
+  try{localStorage.setItem(VKEY,JSON.stringify(v));return true}
+  catch(e){say('تعذّر الحفظ في المتصفح. استعمل «حفظ البيانات (JSON)».');return false}
+}
+function renderVersions(){
+  const v=getVersions();
+  $('vlist').innerHTML=v.length?v.map(x=>`<li data-id="${esc(x.id)}"><span>${esc(x.name)}<small>${esc(x.date)} — ${x.cards.length} بطاقة</small></span><button data-a="open">فتح</button><button class="alt" data-a="del">حذف</button></li>`).join(''):'';
+}
+function saveVersion(){
+  if(!current.length)return;
+  const v=getVersions();
+  const name=$('vname').value.trim()||('نسخة '+(v.length+1));
+  v.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,date:new Date().toLocaleString('ar-DZ'),settings:settings(),cards:current});
+  if(setVersions(v.slice(0,30))){$('vname').value='';renderVersions();say('تم حفظ النسخة «'+name+'».')}
+}
+$('vsave').onclick=saveVersion;
+$('vname').onkeydown=e=>{if(e.key==='Enter')saveVersion()};
+$('vlist').onclick=e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const id=b.closest('li').dataset.id,v=getVersions(),x=v.find(y=>y.id===id);
+  if(!x)return;
+  if(b.dataset.a==='open'){
+    applySettings(x.settings);current=x.cards;$('n').value=current.length;
+    render();autosave();say('تم فتح «'+x.name+'».');
+  }else if(confirm('حذف النسخة «'+x.name+'»؟')){
+    if(setVersions(v.filter(y=>y.id!==id))){renderVersions();say('تم الحذف.')}
+  }
+};
+renderVersions();
+
+/* ---------- الصور: نسخ / حفظ PNG ---------- */
+const sheets=()=>[...document.querySelectorAll('#out .sheet')];
+function fillSheets(){
+  const duplex=$('m').value==='duplex';
+  $('sel').innerHTML=sheets().map((_,i)=>`<option value="${i}">${duplex?`الورقة ${Math.floor(i/2)+1} (${i%2?'الظهر':'الوجه'})`:`الورقة ${i+1}`}</option>`).join('');
+}
+async function sheetBlob(el,scale=3){
+  const host=document.createElement('div');
+  host.style.cssText='position:fixed;left:-10000px;top:0;width:190mm;';
+  const clone=el.cloneNode(true);
+  clone.style.width='190mm';clone.style.maxWidth='none';
+  host.appendChild(clone);document.body.appendChild(host);
+  const r=clone.getBoundingClientRect(),W=Math.ceil(r.width),H=Math.ceil(r.height);
+  const wrap=document.createElement('div');
+  wrap.setAttribute('dir','rtl');wrap.setAttribute('lang','ar');
+  wrap.style.cssText='font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",sans-serif;line-height:1.7;background:#fff';
+  const st=document.createElement('style');st.textContent=document.querySelector('style').textContent;
+  wrap.appendChild(st);wrap.appendChild(clone);
+  const xml=new XMLSerializer().serializeToString(wrap);
+  host.remove();
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><foreignObject x="0" y="0" width="${W}" height="${H}">${xml}</foreignObject></svg>`;
+  const img=new Image();
+  await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)});
+  const c=document.createElement('canvas');c.width=W*scale;c.height=H*scale;
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.scale(scale,scale);x.drawImage(img,0,0,W,H);
+  return new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('blob')),'image/png'));
+}
+async function copyImg(){
+  const el=sheets()[+$('sel').value];if(!el)return;
+  if(!(navigator.clipboard&&window.ClipboardItem)){say('المتصفح لا يدعم النسخ كصورة. استعمل «حفظ كصورة PNG».');return}
+  say('جارٍ التحضير…');
+  try{
+    await navigator.clipboard.write([new ClipboardItem({'image/png':sheetBlob(el)})]);
+    say('تم نسخ الورقة كصورة. الصقها في Word أو أي برنامج (Ctrl+V).');
+  }catch(e){say('تعذّر النسخ. استعمل «حفظ كصورة PNG».')}
+}
+async function saveImg(all){
+  const list=sheets();if(!list.length)return;
+  const idx=all?list.map((_,i)=>i):[+$('sel').value];
+  say('جارٍ التحضير…');
+  try{
+    for(const i of idx){
+      download(`cartes-${stamp()}-${i+1}.png`,await sheetBlob(list[i]),'image/png');
+      if(idx.length>1)await new Promise(r=>setTimeout(r,400));
+    }
+    say(idx.length>1?'تم حفظ '+idx.length+' صور.':'تم حفظ الصورة.');
+  }catch(e){say('تعذّر إنشاء الصورة في هذا المتصفح. جرّب Chrome أو Firefox.')}
+}
+$('ci').onclick=copyImg;
+$('si').onclick=()=>saveImg(false);
+$('sa').onclick=()=>saveImg(true);
+
+$('go').onclick=generate;
+$('pr').onclick=()=>window.print();
+$('sh').onclick=saveHTML;
+$('sj').onclick=saveJSON;
+$('lj').onclick=()=>$('file').click();
+$('file').onchange=e=>{if(e.target.files[0])loadJSON(e.target.files[0]);e.target.value=''};
+$('m').onchange=()=>{if(current.length){render();autosave()}};
+['n','L','d'].forEach(k=>$(k).addEventListener('change',autosave));
+
+if(autoload())render();else generate();
+</script>
+</body>
+</html>
